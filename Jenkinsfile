@@ -2,11 +2,13 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_HOST = 'tcp://host.docker.internal:2375'
         DOCKER_IMAGE = 'eddah0salma/gestion-produits'
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
         VERSION = "${BUILD_NUMBER}"
+        DOCKER_HOST = 'tcp://host.docker.internal:2375'
+}
     }
+
 
     tools {
         maven 'Maven'
