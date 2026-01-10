@@ -48,15 +48,11 @@ pipeline {
         stage('5️⃣ Tests Selenium') {
             steps {
             script {
-                    try {
-                        sh 'mvn verify -Dgroups=selenium'
-                    } catch (Exception e) {
-                        echo "⚠️ Tests Selenium échoués - Continuer quand même"
-                        currentBuild.result = 'UNSTABLE'
-                    }
-                }
-            }
-        }
+            try {
+                sh 'mvn verify -Dgroups=selenium'
+            } catch (Exception e) {
+                echo "⚠️ Tests Selenium échoués - Continuer quand même"
+                currentBuild.result = 'UNSTABLE'
             }
         }
     }
