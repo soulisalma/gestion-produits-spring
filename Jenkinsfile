@@ -6,6 +6,10 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
         VERSION = "${BUILD_NUMBER}"
     }
+
+    tools {
+        maven 'Maven'
+    }
     
     stages {
         stage('1️⃣ Checkout Code') {
