@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gestion-produits-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gestion-produits
+  template:
+    metadata:
+      labels:
+        app: gestion-produits
+    spec:
+      containers:
+      - name: gestion-produits
+        image: eddah0salma/gestion-produits:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DB_URL
+          value: "jdbc:mysql://mysql-service:3306/gestion_produits"
+        - name: DB_USER
+          value: "produits_user"
+        - name: DB_PASS
+          value: "produits_pass"
