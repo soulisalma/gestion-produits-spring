@@ -196,8 +196,8 @@ docker exec jenkins kubectl version --client
 # Créer le dossier .kube dans Jenkins
 docker exec -u root jenkins mkdir -p /root/.kube
 
-# Copier la configuration kubectl dans Jenkins (adapter le chemin selon votre système)
-docker cp ~/.kube/config jenkins:/root/.kube/config
+# Copier la configuration kubectl dans Jenkins (Windows)
+docker cp %USERPROFILE%\.kube\config jenkins:/root/.kube/config
 
 # Donner les permissions
 docker exec -u root jenkins chmod 600 /root/.kube/config
@@ -206,11 +206,11 @@ docker exec -u root jenkins chmod 600 /root/.kube/config
 ### 4. Configurer le contexte Minikube
 
 ```bash
-# Générer la configuration Minikube aplatie
-minikube kubectl -- config view --flatten > ~/.kube/config
+# Générer la configuration Minikube aplatie (Windows)
+minikube kubectl -- config view --flatten > %USERPROFILE%\.kube\config
 
 # Copier à nouveau dans Jenkins
-docker cp ~/.kube/config jenkins:/root/.kube/config
+docker cp %USERPROFILE%\.kube\config jenkins:/root/.kube/config
 ```
 
 ### 5. Vérifier la connexion
