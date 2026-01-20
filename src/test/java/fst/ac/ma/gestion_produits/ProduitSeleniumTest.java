@@ -9,7 +9,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
-
+import io.github.bonigarcia.wdm.WebDriverManager;
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,6 +28,7 @@ class ProduitSeleniumTest {
 
     @BeforeEach
     void setUp() {
+        WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
         options.addArguments(
                 "--headless=new",
