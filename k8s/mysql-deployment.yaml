@@ -18,14 +18,22 @@ spec:
         ports:
         - containerPort: 3306
         env:
-        - name: MYSQL_ROOT_PASSWORD
-          value: "rootpass123"
-        - name: MYSQL_DATABASE
-          value: "gestion_produits"
-        - name: MYSQL_USER
-          value: "produits_user"
-        - name: MYSQL_PASSWORD
-          value: "produits_pass"
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: gestion-produits-secrets
+                key: MYSQL_ROOT_PASSWORD
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: gestion-produits-secrets
+                key: DB_USER
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: gestion-produits-secrets
+                key: DB_PASS
+
 ---
 apiVersion: v1
 kind: Service

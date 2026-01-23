@@ -12,23 +12,23 @@ pipeline {
     }
     
     stages {
-        stage('1️⃣ Checkout Code') {
+        stage('Checkout Code') {
             steps {
-                echo '📥 Récupération du code depuis Git...'
+                echo 'Récupération du code depuis Git...'
                 checkout scm
             }
         }
         
-        stage('2️⃣ Build Maven') {
+        stage('Build Maven') {
             steps {
-                echo '🔨 Compilation du projet...'
+                echo 'Compilation du projet...'
                 sh 'mvn clean compile'
             }
         }
         
-        stage('3️⃣ Tests Unitaires') {
+        stage('Tests Unitaires') {
             steps {
-                echo '🧪 Exécution des tests unitaires...'
+                echo 'Exécution des tests unitaires...'
                 sh 'mvn test -Dgroups=Unitaire'
             }
             post {
@@ -38,36 +38,36 @@ pipeline {
             }
         }
         
-        stage('4️⃣ Tests d\'Intégration') {
+        stage('Tests d\'Intégration') {
             steps {
-                echo '🔗 Exécution des tests d\'intégration...'
+                echo 'Exécution des tests d\'intégration...'
                 sh 'mvn test -Dgroups=Integration'
             }
         }
         
-        stage('5️⃣ Tests Selenium') {
+        stage('Tests Selenium') {
             steps {
                 script {
                     try {
                         sh 'mvn verify -Dgroups=selenium'
                     } catch (Exception e) {
-                        echo "⚠️ Tests Selenium échoués - Continuer quand même"
+                        echo "Tests Selenium échoués - Continuer quand même"
                         currentBuild.result = 'UNSTABLE'
                     }
                 }
             }
         }
         
-        stage('6️⃣ Package Application') {
+        stage('Package Application') {
             steps {
-                echo '📦 Création du fichier JAR...'
+                echo 'Création du fichier JAR...'
                 sh 'mvn package -DskipTests'
             }
         }
         
-        stage('7️⃣ Build Docker Image') {
+        stage('Build Docker Image') {
             steps {
-                echo '🐳 Construction de l\'image Docker...'
+                echo 'Construction de l\'image Docker...'
                 script {
                     docker.build("${DOCKER_IMAGE}:${VERSION}")
                     docker.build("${DOCKER_IMAGE}:latest")
@@ -75,9 +75,9 @@ pipeline {
             }
         }
         
-        stage('8️⃣ Push to Docker Hub') {
+        stage('Push to Docker Hub') {
             steps {
-                echo '⬆️ Envoi vers Docker Hub...'
+                echo 'Envoi vers Docker Hub...'
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', DOCKER_CREDENTIALS_ID) {
                         docker.image("${DOCKER_IMAGE}:${VERSION}").push()
@@ -87,51 +87,60 @@ pipeline {
             }
         }
         
-        stage('9️⃣ Deploy to Kubernetes') {
+        stage('Deploy to Kubernetes') {
             steps {
-                echo '☸️ Déploiement sur Kubernetes (Minikube)...'
+                echo 'Déploiement sur Kubernetes (Docker Desktop)...'
                 script {
                     try {
                         sh 'kubectl apply -f k8s/mysql-deployment.yaml'
-                        echo '✅ MySQL déployé'
+                        echo 'MySQL déployé'
                         
                         sh 'kubectl wait --for=condition=ready pod -l app=mysql --timeout=120s || true'
                         
                         sh 'kubectl apply -f k8s/deployment.yaml'
                         sh 'kubectl apply -f k8s/service.yaml'
-                        echo '✅ Application déployée'
+                        echo 'Application déployée'
                         
                         sh "kubectl set image deployment/gestion-produits-deployment gestion-produits=${DOCKER_IMAGE}:${VERSION}"
-                        
                         sh 'kubectl rollout status deployment/gestion-produits-deployment --timeout=180s'
                         
                         sh 'kubectl apply -f k8s/prometheus-config.yaml || true'
                         sh 'kubectl apply -f k8s/grafana.yaml || true'
                         
-                        echo '✅ Déploiement Kubernetes terminé avec succès!'
+                        sh 'kubectl apply -f k8s/ingress.yaml'
+                        echo 'Ingress configuré'
+                        
+                        echo 'Déploiement Kubernetes terminé avec succès!'
                         
                     } catch (Exception e) {
-                        echo "❌ Erreur lors du déploiement: ${e.getMessage()}"
+                        echo "Erreur lors du déploiement: ${e.getMessage()}"
                         throw e
                     }
                 }
             }
         }
         
-        stage('🔟 Health Check') {
+        stage('Health Check & URLs') {
             steps {
-                echo '💚 Vérification de la santé de l\'application...'
+                echo 'Vérification de la santé de l\'application...'
                 script {
                     try {
-                        sh 'minikube service gestion-produits-service --url > service_url.txt || true'
+                        sleep(time: 15, unit: 'SECONDS')
                         
-                        sleep(time: 10, unit: 'SECONDS')
-                        
-                        echo '✅ Application déployée et accessible!'
-                        echo '🔗 Pour accéder à l\'application: minikube service gestion-produits-service'
+                        echo 'Application déployée et accessible!'
+                        echo ''
+                        echo '=========================================='
+                        echo 'URLs ACCESSIBLES (via Ingress):'
+                        echo '=========================================='
+                        echo 'Application principale:  http://localhost/'
+                        echo 'Prometheus:              http://localhost/prometheus'
+                        echo 'Grafana:                 http://localhost/grafana'
+                        echo '=========================================='
+                        echo ''
+                        echo 'Tous les services sont accessibles via localhost grâce à Ingress!'
                         
                     } catch (Exception e) {
-                        echo "⚠️ Health check non disponible: ${e.getMessage()}"
+                        echo "Health check: ${e.getMessage()}"
                     }
                 }
             }
@@ -140,25 +149,26 @@ pipeline {
     
     post {
         success {
-            echo '✅ =========================================='
-            echo '✅ Pipeline exécuté avec succès !'
-            echo '✅ Application déployée sur Kubernetes'
-            echo '✅ =========================================='
+            echo '=========================================='
+            echo 'Pipeline exécuté avec succès !'
+            echo 'Application déployée sur Kubernetes (Docker Desktop)'
+            echo '=========================================='
             echo ''
-            echo '📋 Pour accéder aux services:'
-            echo '   Application: minikube service gestion-produits-service'
-            echo '   Prometheus:  minikube service prometheus-service'
-            echo '   Grafana:     minikube service grafana-service'
+            echo 'ACCÈS AUX SERVICES VIA INGRESS:'
+            echo '   Application:  http://localhost/'
+            echo '   Prometheus:   http://localhost/prometheus'
+            echo '   Grafana:      http://localhost/grafana'
+            echo ''
+            echo 'Utilisez kubectl get ingress pour voir la configuration'
         }
         failure {
-            echo '❌ =========================================='
-            echo '❌ Pipeline échoué !'
-            echo '❌ Vérifiez les logs ci-dessus'
-            echo '❌ =========================================='
+            echo '=========================================='
+            echo 'Pipeline échoué !'
+            echo 'Vérifiez les logs ci-dessus'
+            echo '=========================================='
         }
         always {
-            echo '🧹 Nettoyage des ressources...'
-            sh 'rm -f service_url.txt || true'
+            echo 'Nettoyage des ressources...'
         }
     }
 }

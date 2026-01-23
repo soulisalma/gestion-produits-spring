@@ -3,11 +3,9 @@ kind: Service
 metadata:
   name: gestion-produits-service
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: gestion-produits
   ports:
-    - protocol: TCP
-      port: 5000
+    - port: 5000
       targetPort: 5000
-      nodePort: 30007

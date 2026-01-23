@@ -21,6 +21,12 @@ spec:
         - name: DB_URL
           value: "jdbc:mysql://mysql-service:3306/gestion_produits"
         - name: DB_USER
-          value: "produits_user"
+          valueFrom:
+            secretKeyRef:
+              name: gestion-produits-secrets
+              key: DB_USER
         - name: DB_PASS
-          value: "produits_pass"
+          valueFrom:
+            secretKeyRef:
+              name: gestion-produits-secrets
+              key: DB_PASS
