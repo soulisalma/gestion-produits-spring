@@ -87,6 +87,13 @@ pipeline {
             }
         }
         
+        stage('Apply Secrets') {
+            steps {
+                echo 'Application des secrets Kubernetes...'
+                sh 'kubectl apply -f k8s/secret.yaml'
+            }
+        }
+        
         stage('Deploy to Kubernetes') {
             steps {
                 echo 'Déploiement sur Kubernetes (Docker Desktop)...'
