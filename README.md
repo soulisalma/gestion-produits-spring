@@ -1,7 +1,7 @@
-# Gestion Produits
+# Gestion Produits 
 
 ## Description
-Projet Spring Boot pour gérer des produits avec interface web, base de données et tests automatisés.
+Projet Spring Boot de gestion des produits avec interface web, base de données, tests automatisés et pipeline CI/CD.
 
 **Fonctionnalités** :
 * CRUD complet (Créer, Lire, Modifier, Supprimer)
